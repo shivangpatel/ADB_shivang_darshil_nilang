@@ -1,0 +1,23 @@
+4._____________ join
+
+p.nO : 208
+
+5._____________iNDEX & sEQUENCES
+
+P.NO : 239 __ INDEX
+P.NO : 257 __ SEQUENCES
+
+6._________VIEW
+
+p.NO : 252
+
+7.________BLOCKS
+P.NO : 320
+
+DECLARE
+  l_message  
+  VARCHAR2 (100) := 'NILANG_KP_KC!';
+BEGIN
+  DBMS_OUTPUT.put_line (l_message);
+END;
+
