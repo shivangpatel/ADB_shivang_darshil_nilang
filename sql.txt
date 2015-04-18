@@ -14,6 +14,32 @@ p.NO : 252
 7.________BLOCKS
 P.NO : 320
 
+9._______Cursur
+P.No : 336
+
+10. LOCKS
+P.nO : 353
+
+11. ERROE HANDLING
+P.NO : 369
+
+12. sTOREED PROCIDURE & FUNCTION
+p.nO : 379
+
+13. PACKEGE
+P.NO : 387
+
+14. oVERLOADING _ OVERRIDING
+P. NO : 397
+
+
+15. TRIGER
+P.NO : 403
+
+
+
+
+
 DECLARE
   l_message  
   VARCHAR2 (100) := 'NILANG_KP_KC!';
@@ -21,3 +47,176 @@ BEGIN
   DBMS_OUTPUT.put_line (l_message);
 END;
 
+
+ BEGIN
+    UPDATE ACCOUNT SET BALANCE= &BALANCE
+    WHERE ACCOUNT_NUMBER = &ACCOUNT_NUMBER;
+    IF SQL%FOUND THEN
+            dbms_output.put_line('Balance is updated!');
+    END IF;
+    IF SQL%NOTFOUND THEN
+            dbms_output.put_line('Balance NOT updated!');
+    END IF;
+ END;
+
+
+DECLARE 
+	CURSOR ac_cur IS
+	SELECT ACCOUNT_NUMBER FROM ACCOUNT WHERE ACCOUNT_NUMBER > 105;
+	ac_rec ACCOUNT.ACCOUNT_NUMBER%type; 
+BEGIN 
+	OPEN ac_cur;
+	IF NOT ac_cur%ISOPEN THEN
+		dbms_output.put_line('NOT OPEN'); 
+	END IF;
+
+	dbms_output.put_line('Fetched Account Number :');
+	LOOP
+		FETCH ac_cur INTO ac_rec; 
+		EXIT WHEN ac_cur%NOTFOUND; 
+			dbms_output.put_line(ac_rec);
+	END LOOP; 
+END; 
+
+C 1::::
+SQL> LOCK TABLE LOAN IN EXCLUSIVE MODE NOWAIT;
+
+Table(s) Locked.
+
+SQL> INSERT INTO LOAN VALUES(408,'NARANPURA',10000);
+
+1 row created.
+
+SQL> SELECT * FROM LOAN;
+
+
+c 2 : ::::
+
+SQL> SELECT * FROM LOAN WHERE LOAN_NUMBER = 401;
+
+LOAN_NUMBER BRANCH_NAME              AMOUNT
+----------- -------------------- ----------
+        401 sbi                        1000
+
+SQL> INSERT INTO LOAN VALUES(409,'ABD',1200);
+
+
+
+DECLARE
+	loan_id number;
+	branch_name varchar2(10);
+	amount number;
+	oper char(1);
+BEGIN
+	loan_id:= &loan_id;
+	branch_name:= &branch_name;
+	oper:= &oper;
+
+	select AMOUNT into amount from LOAN where LOAN_NUMBER = loan_id for update nowait;
+
+	if oper = 'D' then
+		update LOAN set AMOUNT = AMOUNT-100 where LOAN_NUMBER = loan_id;
+	elsif oper = 'C' then
+		update LOAN set AMOUNT = AMOUNT+100 where LOAN_NUMBER  = loan_id;
+	end if;
+end;
+
+
+create or replace package cust_pack is
+procedure cust_proc(empno in number);
+procedure cust_proc(ename in varchar2);
+end;
+
+
+
+SQL>  create or replace package body emp_pack is
+  2   procedure emp_proc(empno in number) is
+  3   begin
+  4   update emp set sal=sal+100 where empno=empno;
+  5          if sql%found then
+  6          dbms_output.put_line('update='||sql%rowcount);
+  7           end if;
+  8        if sql%notfound then
+  9        dbms_output.put_line('not update='||sql%rowcount);
+ 10     end if;
+ 11   end;
+ 12   procedure emp_proc(ename in varchar2) is
+ 13   begin
+ 14   update emp set sal=sal+100 where ename=ename;
+ 15          if sql%found then
+ 16          dbms_output.put_line('update='||sql%rowcount);
+ 17           end if;
+ 18        if sql%notfound then
+ 19        dbms_output.put_line('not update='||sql%rowcount);
+ 20     end if;
+ 21   end;
+ 22   end emp_pack;
+ 23  /
+
+
+create or replace trigger bankTR
+after upadte on ACCOUNT
+for each row
+
+declare
+
+begin
+	if upadating then
+		if :new.BALANCE<10000 then
+			dbms_output.put_line('old BAL='||:old.BALANCE||'BALANCE is not < 10000 new BAL = '||new.BALANCE);
+		end if;
+	end if;
+end;
+
+
+
+SQL> create or replace trigger emp_tr
+  2  after update on emp
+  3  for each row
+  4  declare
+  5  begin
+  6  if updating then
+  7  if :new.sal<1000 then
+  8  dbms_output.put_line('old salary='||:old.sal||'salary is not<1000 new 
+  9  sal='||:new.sal);
+ 10  end if;
+ 11  end if;
+ 12  end;
+ 13  /
+
+
+
+SQL> update emp set sal=sal-1000 where empno=7900;
+old salary=850salary is not<1000 new
+sal=-150
+old salary=850salary is not<100 new sal=-150
+
+
+
+
+
+
+CREATE or REPLACE TRIGGER salary_dec_trigger 
+BEFORE UPDATE OF salary ON emp 
+FOR EACH ROW 
+BEGIN 
+  if(:new.salary < :old.salary) then
+    raise_application_error(-20001, 'Salary can''t be decreased');
+  end if;
+END; 
+
+
+
+
+CREATE or REPLACE TRIGGER balance_dec_trigger 
+BEFORE UPDATE OF BALANCE ON ACCOUNT 
+FOR EACH ROW 
+BEGIN 
+  if(:new.BALANCE < :old.BALANCE) then
+    raise_application_error(-20001, 'BALANCE can't be decreased');
+  end if;
+END; 
+
+
+ALTER TABLE t
+ADD CONSTRAINT pk_t;
