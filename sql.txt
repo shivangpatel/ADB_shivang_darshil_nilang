@@ -42,7 +42,7 @@ P.NO : 403
 
 DECLARE
   l_message  
-  VARCHAR2 (100) := 'NILANG_KP_KC!';
+  VARCHAR2 (100) := 'Hello World!';
 BEGIN
   DBMS_OUTPUT.put_line (l_message);
 END;
